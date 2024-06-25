@@ -86,7 +86,7 @@ app.get('/chargers/nearest', (req, res) => {
 app.post('/bookings/book',(req,res) => {
     const {userId,chargerId,startTime}=req.body;
 
-    const charger=chargers.find(c=>c.id===chargerId && c.available);
+    const charger=chargers.find(c => c.id === chargerId && c.available);
     if (!charger) {
         return res.status(404).json({ message: 'Charger not available' });
     }
@@ -98,6 +98,15 @@ app.post('/bookings/book',(req,res) => {
     res.json({ message: 'Booking successful', booking });
 });
 
+
+//endpoint to start charging
+app.post('/bookings/start-charging', (req, res) => {
+    const { userId, chargerId } = req.body;
+
+    console.log('Charging started');
+
+    res.json({ message: 'Charging started' });
+});
 
 
 const PORT = process.env.PORT || 3000;
