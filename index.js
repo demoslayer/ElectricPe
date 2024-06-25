@@ -53,6 +53,8 @@ function calculateDistance(loc1, loc2) {
     return Math.sqrt((loc1.latitude - loc2.latitude) ** 2 + (loc1.longitude - loc2.longitude) ** 2);
 }
 
+
+//API to get all the chargers
 app.get('/chargers/nearest', (req, res) => {
     const {latitude,longitude}=req.query;
     if (!latitude||!longitude) {
@@ -77,6 +79,25 @@ app.get('/chargers/nearest', (req, res) => {
 
     res.json(nearestCharger);
 });
+
+
+
+//endpoint to book a charger checking if charger is available or not
+app.post('/bookings/book',(req,res) => {
+    const {userId,chargerId,startTime}=req.body;
+
+    const charger=chargers.find(c=>c.id===chargerId && c.available);
+    if (!charger) {
+        return res.status(404).json({ message: 'Charger not available' });
+    }
+
+    const booking = new Booking(userId, chargerId, new Date(startTime));
+    bookings.push(booking);
+    charger.available = false;
+
+    res.json({ message: 'Booking successful', booking });
+});
+
 
 
 const PORT = process.env.PORT || 3000;
