@@ -94,18 +94,47 @@ app.post('/bookings/book',(req,res) => {
     const booking = new Booking(userId, chargerId, new Date(startTime));
     bookings.push(booking);
     charger.available = false;
-
+    console.log('Booking successful');
     res.json({ message: 'Booking successful', booking });
 });
 
 
 //endpoint to start charging
 app.post('/bookings/start-charging', (req, res) => {
-    const { userId, chargerId } = req.body;
+    const {userId,chargerId }=req.body;
 
     console.log('Charging started');
 
     res.json({ message: 'Charging started' });
+});
+
+
+//endpoint to end charging and calculate the cost of charging
+app.post('/bookings/end-charging', (req, res) => {
+    const {userId,chargerId,endTime}=req.body;
+
+    const booking =bookings.find(b => b.userId === userId && b.chargerId === chargerId && !b.endTime);
+    if (!booking){
+        return res.status(404).json({message:'No active booking found' });
+    }
+
+    booking.endTime=new Date(endTime);
+    const charger=chargers.find(c => c.id === chargerId);
+    charger.available=true;
+
+    const chargingDuration=(booking.endTime - booking.startTime) / 3600000; 
+    booking.cost=chargingDuration * 50; 
+
+    res.json({
+        message:'Charging ended. Payment pending',
+        booking:{
+            userId: booking.userId,
+            chargerId: booking.chargerId,
+            startTime: booking.startTime,
+            endTime: booking.endTime,
+            cost: booking.cost
+        }
+    });
 });
 
 
